@@ -6,15 +6,15 @@ import io
 
 from docx import Document
 
-#Import LLM - Langchain
-from langchain.llms import OpenAI
+
 
 # TEST VERSION #
 test = False
+
 if test == True:
     from apikeys import openaikey
-    os.environ['OPENAI_API_KEY'] = openaikey
-    llm = OpenAI(temperature=0.4)
+else:
+    openaikey = ""
 
 # CLOUD VERSION #
 # openaikey = st.secrets['OPENAI_API_KEY']
@@ -22,12 +22,15 @@ if test == True:
 # AI STUFF BELOW
 # ____________________
 
+#Import LLM - Langchain
+from langchain.llms import OpenAI
 
 #Langchain Features
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-
+os.environ['OPENAI_API_KEY'] = openaikey
+llm = OpenAI(temperature=0.4)
 
 response_summary_template = PromptTemplate(
     input_variables = ["survey_question", "responses"],
