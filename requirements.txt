@@ -1,0 +1,9 @@
+streamlit==1.22.0
+supabase==1.0.3
+openai==0.27.7
+openapi-schema-pydantic==1.2.4
+langchain==0.0.178
+python-docx==0.8.11
+tiktoken==0.4.0
+
+
