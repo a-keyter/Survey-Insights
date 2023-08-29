@@ -6,18 +6,12 @@ import io
 
 from docx import Document
 
-
-
 # TEST VERSION #
 test = False
 
 if test == True:
     from apikeys import openaikey
-else:
-    openaikey = ""
-
-# CLOUD VERSION #
-# openaikey = st.secrets['OPENAI_API_KEY']
+    os.environ['OPENAI_API_KEY'] = openaikey
 
 # AI STUFF BELOW
 # ____________________
@@ -29,8 +23,21 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-os.environ['OPENAI_API_KEY'] = openaikey
-llm = OpenAI(temperature=0.4)
+#### Sidebar ####
+
+with st.sidebar:
+  st.title("AI Survey Response Reports")
+  st.header("Turn responses into insights")
+  st.write("This tool is designed to process survey results as a CSV & summarise all survey responses.")
+  st.divider()
+  user_openai = st.text_input("Please enter your OpenAI API Key:",)
+
+if user_openai == "" and test == False:
+  st.error("Please enter your OpenAI - API Key")
+
+if user_openai != "" and test == False:
+    os.environ['OPENAI_API_KEY'] = user_openai
+    llm = OpenAI(temperature=0.4)
 
 response_summary_template = PromptTemplate(
     input_variables = ["survey_question", "responses"],
@@ -99,16 +106,6 @@ def process_survey_responses(survey_question = str, responses = list):
 #############################################################
 
 ################### App Layout #########################
-
-with st.sidebar:
-  st.title("AI Survey Response Reports")
-  st.header("Turn responses into insights")
-  st.write("This tool is designed to process survey results as a CSV & summarise all survey responses.")
-  st.divider()
-  user_openai = st.text_input("Please enter your OpenAI API Key:",)
-
-if user_openai == "" and test == False:
-  st.error("Please enter your OpenAI - API Key")
 
 report_name = st.text_input("Give a title to your survey response report.")
 
