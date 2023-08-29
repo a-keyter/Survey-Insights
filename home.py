@@ -2,16 +2,20 @@ import os
 import streamlit as st
 import tiktoken
 import pandas as pd
+
 import io
+import base64
+from tempfile import NamedTemporaryFile
 
 from docx import Document
+from docx.shared import Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # TEST VERSION #
-test = False
+from apikeys import openaikey
 
-if test == True:
-    from apikeys import openaikey
-    os.environ['OPENAI_API_KEY'] = openaikey
+# CLOUD VERSION #
+# openaikey = st.secrets['OPENAI_API_KEY']
 
 # AI STUFF BELOW
 # ____________________
@@ -23,21 +27,9 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-#### Sidebar ####
+os.environ['OPENAI_API_KEY'] = openaikey
 
-with st.sidebar:
-  st.title("AI Survey Response Reports")
-  st.header("Turn responses into insights")
-  st.write("This tool is designed to process survey results as a CSV & summarise all survey responses.")
-  st.divider()
-  user_openai = st.text_input("Please enter your OpenAI API Key:",)
-
-if user_openai == "" and test == False:
-  st.error("Please enter your OpenAI - API Key")
-
-if user_openai != "" and test == False:
-    os.environ['OPENAI_API_KEY'] = user_openai
-    llm = OpenAI(temperature=0.4)
+llm = OpenAI(temperature=0.4)
 
 response_summary_template = PromptTemplate(
     input_variables = ["survey_question", "responses"],
@@ -107,6 +99,13 @@ def process_survey_responses(survey_question = str, responses = list):
 
 ################### App Layout #########################
 
+with st.sidebar:
+  st.title("AI Survey Response Reports")
+  st.header("Turn responses into insights")
+  st.write("This tool is designed to process survey results as a CSV & summarise all survey responses.")
+  st.divider()
+  user_openai = st.text_input("Please enter your OpenAI API Key:",)
+
 report_name = st.text_input("Give a title to your survey response report.")
 
 survey_responses_csv = st.file_uploader("Upload the survey response file here:", accept_multiple_files=False, type="csv")
@@ -118,13 +117,10 @@ elif submit and report_name != "" and survey_responses_csv is None:
     st.error("You must upload the survey responses")
 elif submit and report_name != "" and survey_responses_csv is not None:
     with st.spinner("Processing Survey Data"):
-        if test == False:
-            openaikey = user_openai
-            os.environ['OPENAI_API_KEY'] = openaikey
-            llm = OpenAI(temperature=0.4)
-
         df = pd.read_csv(survey_responses_csv)
         responses = len(df.index)
+
+        st.dataframe(df)
 
         df_cols = len(df.axes[1])
         col_names = list(df.columns)
